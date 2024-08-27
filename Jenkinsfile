@@ -9,7 +9,7 @@ pipeline {
 	stages {
 		stage('Checkout') {
 			steps {
-				git url: 'git@github.com:vanthiyadhevan/playwright_python.git', branch: 'main'
+				git url: 'git@github.com:vanthiyadhevan/playwright_python.git', branch: 'main' credentialsId: 'vanthiyadhevan'
 			}
 		}
 		stage ('Build Docker images') {
