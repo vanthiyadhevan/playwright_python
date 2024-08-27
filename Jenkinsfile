@@ -1,8 +1,5 @@
 pipeline {
 	agent any
-	// tools {
-	// 	node nodejs
-	// }
 	environment {
 		IMAGE_NAME = 'playwright_python'
 	}
