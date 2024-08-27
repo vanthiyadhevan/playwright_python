@@ -1,29 +1,27 @@
 pipeline {
 	agent any
-	tools {
-		node nodejs
+	// tools {
+	// 	node nodejs
+	// }
+	environment {
+		IMAGE_NAME = 'playwright_python'
 	}
 	stages {
 		stage('Checkout') {
 			steps {
-				git url: 'https://github.com/microsoft/playwright.git', branch: 'release-1.46'
-			}
-		}
-		stage ('Build') {
-			steps {
-				sh 'npm install'
-			}
-		}
-		stage ('Test') {
-			steps {
-				sh 'npm test'
+				git url: 'git@github.com:vanthiyadhevan/playwright_python.git', branch: 'main'
 			}
 		}
 		stage ('Build Docker images') {
 			steps {
 				script {
-					docker.build("", '')
+					docker.build("${IMAGE_NAME}:${BUILD_NUMBER}", '.')
 				}
+			}
+		}
+		stage ('Test Your Application In Docker') {
+			steps {
+				sh "docker run ${IMAGE_NAME}:${BUILD_NUMBER} pytest -v"
 			}
 		}
 	}
