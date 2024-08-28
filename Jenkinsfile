@@ -1,7 +1,7 @@
 pipeline {
 	agent any
 	environment {
-		IMAGE_NAME = 'playwright_python_test'
+		IMAGE_NAME = 'playwright_python'
 	}
 	stages {
 		stage('Checkout') {
