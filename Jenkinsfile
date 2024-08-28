@@ -6,7 +6,8 @@ pipeline {
 	stages {
 		stage('Checkout') {
 			steps {
-				git url: 'git@github.com:vanthiyadhevan/playwright_python.git', branch: 'main', credentialsId: 'vanthiyadhevan'
+				// git url: 'git@github.com:vanthiyadhevan/playwright_python.git', branch: 'main', credentialsId: 'vanthiyadhevan'
+				git url: 'https://github.com/vanthiyadhevan/playwright_python.git', branch: 'main'
 			}
 		}
 		stage ('Build Docker images') {
