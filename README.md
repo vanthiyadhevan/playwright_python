@@ -1,4 +1,4 @@
-# Playwright And Docker By vickey
+# Playwright And Docker By Vickey_G
 This repository contains code to demo Python Playwright 🎭 and Docker🐋
 
 The entire testing was performed on local gird as well as [LambdaTest Cloud Grid](http://www.lambdatest.com?fp_ref=jaydeep88)
