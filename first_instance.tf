@@ -6,7 +6,7 @@ provider "aws" {
 
 resource "aws_instance" "intro" {
   ami                    = "ami-0e86e20dae9224db8"
-  instance_type          = "t2.small"
+  instance_type          = "t2.micro"
   key_name               = "vickey-prod-key"
   vpc_security_group_ids = ["sg-096add7865a855a64"]
 
