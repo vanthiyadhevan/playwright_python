@@ -1,0 +1,29 @@
+pipeline {
+	agent any
+	environment {
+		IMAGE_NAME = 'playwright_python'
+	}
+	stages {
+		stage('Checkout') {
+			steps {
+				git url: 'git@github.com:vanthiyadhevan/playwright_python.git', branch: 'main', credentialsId: 'vanthiyadhevan'
+				// git url: 'https://github.com/vanthiyadhevan/playwright_python.git', branch: 'main'
+			}
+		}
+		stage ('Terraform Init') {
+			steps {
+				sh 'terraform init'
+			}
+		}
+		stage ('Terraform Validate') {
+			steps {
+				sh "terraform validate"
+			}
+		}
+		stage ('Terrafrom Apply') {
+			steps {
+				sh 'terrafrom apply'
+			}
+		}
+	}
+}
