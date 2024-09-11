@@ -1,12 +1,14 @@
 pipeline {
     agent any
     environment {
-        AWS_CREDENTIALS = credentials('aws-credentials-id') // AWS IAM credentials stored in Jenkins
+        AWS_CREDENTIALS = credentials('awscreds')
+
+        IMAGE_NAME = 'playwright_python'
     }
     stages {
         stage('Clone repository') {
             steps {
-                git 'https://github.com/your-repo/terraform-code.git' // Replace with your GitHub repo
+                git 'https://github.com/vanthiyadhevan/playwright_python.git', branch: 'jenkins_slave_node' 
             }
         }
         stage('Terraform Init') {
@@ -14,9 +16,14 @@ pipeline {
                 sh 'terraform init'
             }
         }
+        stage('Terraform Validate') {
+            steps {
+                sh 'terraform validate'
+            }
+        }
         stage('Terraform Apply') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'awscreds']]) {
                     sh 'terraform apply -auto-approve'
                 }
             }
@@ -25,7 +32,7 @@ pipeline {
             steps {
                 script {
                     // Fetch the instance details from Terraform output
-                    def instanceIp = sh(script: 'terraform output -raw instance_ip', returnStdout: true).trim()
+                    def instanceIp = sh(script: 'terraform output -raw PublicIP', returnStdout: true).trim()
 
                     // Register EC2 as a Jenkins slave
                     // You'll need to use SSH credentials for connecting to the EC2 instance
@@ -37,14 +44,16 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 // Build the Docker image from the cloned code
-                sh 'docker build -t my-app-image .'
+                script {
+                    docker.build("${IMAGE_NAME}:${BUILD_NUMBER}", '.')
+                }
             }
         }
         stage('Run Docker on Slave') {
             agent { label 'EC2-Slave' }
             steps {
                 // Run Docker container on the slave instance
-                sh 'docker run my-app-image'
+                sh "docker run ${IMAGE_NAME}:${BUILD_NUMBER} pytest -v"
             }
         }
     }
