@@ -66,9 +66,9 @@ pipeline {
     post {
         always {
             echo "slack Notification..."
-            slackSend channel: '#jenkins-cicd'
-            color: COLOR_MAP[currentBuild.currectResult],
-            message: "*${currentBuild.currentResult}:* job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More Info at: ${env.BUILD_URL}"
+            slackSend channel: "#jenkins-cicd",
+            color: COLOR_MAP[currentBuild.currentResult],
+            message: "*${currentBuild.currentResult}:* job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
         }
     }
 }
