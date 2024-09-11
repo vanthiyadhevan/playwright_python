@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+    environment {
+        AWS_CREDENTIALS = credentials('aws-credentials-id') // AWS IAM credentials stored in Jenkins
+    }
+    stages {
+        stage('Clone repository') {
+            steps {
+                git 'https://github.com/your-repo/terraform-code.git' // Replace with your GitHub repo
+            }
+        }
+        stage('Terraform Init') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+        stage('Terraform Apply') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials-id']]) {
+                    sh 'terraform apply -auto-approve'
+                }
+            }
+        }
+        stage('Provision Jenkins Slave') {
+            steps {
+                script {
+                    // Fetch the instance details from Terraform output
+                    def instanceIp = sh(script: 'terraform output -raw instance_ip', returnStdout: true).trim()
+
+                    // Register EC2 as a Jenkins slave
+                    // You'll need to use SSH credentials for connecting to the EC2 instance
+                    def slaveNode = jenkins.model.Jenkins.instance.createNode('EC2-Slave')
+                    slaveNode.setLauncher(new hudson.slaves.CommandLauncher("ssh -i ~/.ssh/id_rsa ubuntu@${instanceIp} java -jar /home/ubuntu/agent.jar"))
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                // Build the Docker image from the cloned code
+                sh 'docker build -t my-app-image .'
+            }
+        }
+        stage('Run Docker on Slave') {
+            agent { label 'EC2-Slave' }
+            steps {
+                // Run Docker container on the slave instance
+                sh 'docker run my-app-image'
+            }
+        }
+    }
+}
