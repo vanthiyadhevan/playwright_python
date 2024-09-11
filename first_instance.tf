@@ -28,10 +28,14 @@ resource "aws_instance" "intro" {
     # Add Jenkins user to Docker group
     sudo usermod -aG docker jenkins
     sudo chmod 666 /var/run/docker.sock
+
+    # install Jave 
+    apt install openjdk-17-jdk openjdk-17-jre -y
+
   EOF
 
   tags = {
-    Name = "jenkins_and_docker"
+    Name = "Jenkins-Slave"
   }
 }
 
