@@ -1,3 +1,9 @@
+def COLOR_MAP = [
+    'SUCCESS' = 'good',
+    'FAILURE' = 'danger',
+    'UNSTABLE' = 'warning',
+    'ABOURTED' = 'warning'
+]
 pipeline {
     agent any
     environment {
@@ -55,6 +61,14 @@ pipeline {
                 // Run Docker container on the slave instance
                 sh "docker run ${IMAGE_NAME}:${BUILD_NUMBER} pytest -v"
             }
+        }
+    }
+    post {
+        always {
+            echo "slack Notification..."
+            slackSend channel: '#jenkins-cicd'
+            color: COLOR_MAP[currentBuild.currectResult],
+            message: "*${currentBuild.currentResult}:* job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More Info at: ${env.BUILD_URL}"
         }
     }
 }
