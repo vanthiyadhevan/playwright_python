@@ -2,10 +2,13 @@ pipeline {
     agent any
 
     environment {
-        TF_DIR = './terraform'                // Path to your Terraform files
-        SSH_USER = 'ec2-user'                 // User to SSH into EC2
-        SSH_KEY = 'your-ssh-key-path'         // Path to your SSH private key
+        TF_DIR = '/home/mr-skyline/boopathy_playwright_code/playwright-testing-on-docker'                // Path to your Terraform files
+        SSH_USER = 'ubuntu'                 // User to SSH into EC2
+        SSH_KEY = '/home/mr-skyline/Downloads/'         // Path to your SSH private key
         NODE_LABEL = 'jenkins-slave'          // Label to identify the slave node
+
+
+        IMAGE_NAME = 'playwright'
     }
 
     stages {
@@ -15,6 +18,7 @@ pipeline {
                     script {
                         // Initialize and apply Terraform to create the EC2 instance
                         sh 'terraform init'
+                        sh 'terraform validate'
                         sh 'terraform apply -auto-approve'
                     }
                 }
@@ -67,11 +71,14 @@ pipeline {
             steps {
                 script {
                     // Assuming Dockerfile is in the repository or available on the instance
-                    sh """
-                    docker build -t your-image-name .
-                    docker run -d --name your-container-name your-image-name
-                    """
+                    docker.build("${IMAGE_NAME}:${BUILD_NUMBER}", '.')
                 }
+            }
+        }
+        stage('Run the docker image') {
+            agent {label NODE_LABEL}
+            steps {
+                sh "docker run ${IMAGE_NAME}:${BUILD_NUMBER} pytest -v"
             }
         }
     }
