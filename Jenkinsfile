@@ -1,3 +1,9 @@
+def COLOR_MAP = [
+    'SUCCESS' : 'good',
+    'FAILURE' : 'danger',
+    'UNSTABLE' : 'warning',
+    'ABOURTED' : 'warning'
+]
 pipeline {
     agent any
 
@@ -29,7 +35,12 @@ pipeline {
         }
         stage('Terraform Apply') {
             steps {
-                sh 'terraform apply -auto-approve'
+                script {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY', credentialsId: 'awscreds']]) 
+                    {
+                        sh 'terraform apply -auto-approve'
+                    }
+                }
             }
         }
 
@@ -48,7 +59,7 @@ pipeline {
                 script {
                     // Dynamically configure the EC2 instance as a Jenkins agent via SSH
                     def slaveNode = EC2_IP
-                    def jenkinsUser = 'jenkins'   // The user that Jenkins will use to run jobs on the agent
+                    def jenkinsUser = 'ubuntu'   // The user that Jenkins will use to run jobs on the agent
 
                     // Connect the EC2 instance as a Jenkins slave (agent) using the SSH agent plugin
                     node {
@@ -86,6 +97,14 @@ pipeline {
             steps {
                 sh "docker run ${IMAGE_NAME}:${BUILD_NUMBER} pytest -v"
             }
+        }
+    }
+    post {
+        always {
+            echo "slack Notification..."
+            slackSend channel: "#jenkins-cicd",
+            color: COLOR_MAP[currentBuild.currentResult],
+            message: "*${currentBuild.currentResult}:* job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
         }
     }
 }
