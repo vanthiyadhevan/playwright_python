@@ -40,15 +40,6 @@ pipeline {
                     def slaveNode = EC2_IP
                     def jenkinsUser = 'jenkins'   // The user that Jenkins will use to run jobs on the agent
 
-                    // SSH into the EC2 instance to install Java and prepare for Jenkins connection
-                    sh """
-                    ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} << 'EOF'
-                    sudo yum update -y
-                    sudo amazon-linux-extras install java-openjdk11 -y
-                    sudo service docker start
-                    EOF
-                    """
-
                     // Connect the EC2 instance as a Jenkins slave (agent) using the SSH agent plugin
                     node {
                         jenkins.model.Jenkins.getInstance().addNode(new hudson.slaves.DumbSlave(
