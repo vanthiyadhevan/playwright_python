@@ -35,7 +35,7 @@ resource "aws_instance" "intro" {
   EOF
 
   tags = {
-    Name = "Jenkins-Slave"
+    Name = "jenkins-slave"
   }
 }
 
