@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        TF_DIR = '/home/mr-skyline/boopathy_playwright_code/playwright-testing-on-docker'                // Path to your Terraform files
+        // TF_DIR = './'                // Path to your Terraform files
         SSH_USER = 'ubuntu'                 // User to SSH into EC2
         SSH_KEY = '/home/mr-skyline/Downloads/'         // Path to your SSH private key
         NODE_LABEL = 'jenkins-slave'          // Label to identify the slave node
@@ -12,27 +12,33 @@ pipeline {
     }
 
     stages {
+        stage ('Checkout') {
+            steps {
+                git url: 'https://github.com/vanthiyadhevan/playwright_python.git', branch: 'jenkins_slave_node'
+            }
+        }
         stage('Provision Infrastructure with Terraform') {
             steps {
-                dir(TF_DIR) {
-                    script {
-                        // Initialize and apply Terraform to create the EC2 instance
-                        sh 'terraform init'
-                        sh 'terraform validate'
-                        sh 'terraform apply -auto-approve'
-                    }
-                }
+                sh 'terraform init'
+            }
+        }
+        stage('Terraform Validate') {
+            steps {
+                sh 'terraform validate'
+            }
+        }
+        stage('Terraform Apply') {
+            steps {
+                sh 'terraform apply -auto-approve'
             }
         }
 
         stage('Get EC2 Instance IP') {
             steps {
-                dir(TF_DIR) {
-                    script {
-                        // Get the EC2 instance public IP
-                        EC2_IP = sh(script: "terraform output -raw Public_IP", returnStdout: true).trim()
-                        echo "EC2 Instance IP: ${EC2_IP}"
-                    }
+                script {
+                    // Get the EC2 instance public IP
+                    EC2_IP = sh(script: "terraform output -raw Public_IP", returnStdout: true).trim()
+                    echo "EC2 Instance IP: ${EC2_IP}"
                 }
             }
         }
