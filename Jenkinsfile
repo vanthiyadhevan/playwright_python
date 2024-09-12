@@ -60,27 +60,41 @@ pipeline {
                     // Dynamically configure the EC2 instance as a Jenkins agent via SSH
                     def slaveNode = EC2_IP
                     def jenkinsUser = 'ubuntu'   // The user that Jenkins will use to run jobs on the agent
+                    def nodeName = "jenkins-slave"
+                    def remoteFS = "/home/${jenkinsUser}"
+                    def credentialsId = "slave_node"
+                    def nodeDescription = "Slave node for Jenkins"
+                    def numberOfExecutors = "1"
+                    def mode = hudson.model.Node.Mode.NORMAL
+                    def label = NODE_LABEL
+                    def sshPort = 22
 
-                    // Connect the EC2 instance as a Jenkins slave (agent) using the SSH agent plugin
-                    node {
-                        jenkins.model.Jenkins.getInstance().addNode(new hudson.slaves.DumbSlave(
-                            "jenkins-slave",  // Node name
-                            "Slave node for Jenkins",  // Description
-                            "/home/${jenkinsUser}",  // Remote FS root
-                            "1",  // Number of executors
-                            hudson.model.Node.Mode.NORMAL,  // Mode
-                            NODE_LABEL,  // Label
+                    // Check if the node already exists to avoid duplication
+                    def existingNode = jenkins.model.Jenkins.getInstance().getNode(nodeName)
+                    if (existingNode != null) {
+                        println "Node '${nodeName}' already exists. Skipping creation."
+                    } else {
+                        // Create the node and add it to Jenkins
+                        def slave = new hudson.slaves.DumbSlave(
+                            nodeName,  // Node name
+                            nodeDescription,  // Description
+                            remoteFS,  // Remote FS root
+                            numberOfExecutors,  // Number of executors
+                            mode,  // Mode (NORMAL/EXCLUSIVE)
+                            label,  // Label
                             new hudson.plugins.sshslaves.SSHLauncher(
                                 slaveNode,  // Host
-                                22,  // Port
-                                "your-ssh-credentials-id"  // Jenkins credentials ID
+                                sshPort,  // Port
+                                credentialsId  // Jenkins credentials ID for SSH
                             ),
-                            new hudson.slaves.RetentionStrategy.Always()
-                        ))
+                            new hudson.slaves.RetentionStrategy.Always()  // Retention strategy
+                        )
+                        jenkins.model.Jenkins.getInstance().addNode(slave)
+                        println "Node '${nodeName}' added successfully."
                     }
                 }
             }
-        }
+    }
 
         stage('Build Docker Image on Jenkins Slave') {
             agent { label NODE_LABEL }  // Ensure this stage runs on the Jenkins slave
