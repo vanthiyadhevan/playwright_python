@@ -83,16 +83,5 @@ pipeline {
                 }
             }
         }
-
-        stage('Cleanup (Optional)') {
-            steps {
-                script {
-                    // Destroy the infrastructure after the build
-                    dir(TF_DIR) {
-                        sh 'terraform destroy -auto-approve'
-                    }
-                }
-            }
-        }
     }
 }
