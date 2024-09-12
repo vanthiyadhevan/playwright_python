@@ -48,7 +48,7 @@ pipeline {
             steps {
                 script {
                     // Get the EC2 instance public IP
-                    EC2_IP = sh(script: "terraform output -raw Public_IP", returnStdout: true).trim()
+                    EC2_IP = sh(script: "terraform output -raw PublicIP", returnStdout: true).trim()
                     echo "EC2 Instance IP: ${EC2_IP}"
                 }
             }
