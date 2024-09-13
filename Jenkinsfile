@@ -66,7 +66,7 @@ pipeline {
                     def label = NODE_LABEL
                     def slaveNode = EC2_IP   
                     def credentialsId = "slave_node"
-                    def mode = hudson.model.Node.Mode.EXCLUSIVE
+                    def mode = "EXCLUSIVE"
                     def sshPort = 22
 
                     // Check if the node already exists to avoid duplication
@@ -80,7 +80,7 @@ pipeline {
                             nodeDescription,  // Description
                             remoteFS,  // Remote FS root
                             numberOfExecutors,  // Number of executors
-                            mode,  // Mode (NORMAL/EXCLUSIVE)
+                            hudson.model.Node.Mode.valueOf(mode),  // Mode (NORMAL/EXCLUSIVE)
                             label,  // Label
                             new hudson.plugins.sshslaves.SSHLauncher(
                                 slaveNode,  // Host
