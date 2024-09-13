@@ -53,6 +53,19 @@ pipeline {
                 }
             }
         }
+        stage('Configure Jenkins Slave (Agent)') {
+            steps {
+                script {
+                    // SSH into the EC2 instance to install necessary dependencies for Jenkins slave
+                    sh """
+                    ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${SSH_USER}@${EC2_IP} << 'EOF'
+                    sudo yum update -y
+                    sudo apt install openjdk-17-jdk openjdk-17-jre -y
+                    EOF
+                    """
+                }
+            }
+        }
 
         stage('Configure Jenkins Slave (Agent)') {
             steps {
