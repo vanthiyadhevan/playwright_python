@@ -1,0 +1,20 @@
+jenkins:
+  nodes:
+    - permanent:
+        name: "jenkins-slave"
+        description: "AWS EC2 instance configured as a Jenkins slave node"
+        remoteFS: "/home/ubuntu/jenkins"
+        numExecutors: 1
+        launcher:
+          sshLauncher:
+            host: ""
+            port: 22
+            credentialsId: "aws_creds"
+            jvmOptions: "-Xmx1024m"
+            javaPath: "/usr/bin/java"
+            launchTimeoutSeconds: 60
+            maxNumRetries: 5
+            retryWaitTime: 15
+        labelString: "jenkins-slave"
+        retentionStrategy:
+          always: {}
