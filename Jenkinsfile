@@ -58,15 +58,15 @@ pipeline {
             steps {
                 script {
                     // Dynamically configure the EC2 instance as a Jenkins agent via SSH
-                    def slaveNode = EC2_IP
-                    def jenkinsUser = 'ubuntu'   // The user that Jenkins will use to run jobs on the agent
                     def nodeName = "jenkins-slave"
-                    def remoteFS = "/home/${jenkinsUser}"
-                    def credentialsId = "slave_node"
                     def nodeDescription = "Slave node for Jenkins"
                     def numberOfExecutors = "1"
-                    def mode = hudson.model.Node.Mode.NORMAL
+                    def jenkinsUser = 'ubuntu'
+                    def remoteFS = "/home/${jenkinsUser}" 
                     def label = NODE_LABEL
+                    def slaveNode = EC2_IP   
+                    def credentialsId = "slave_node"
+                    def mode = hudson.model.Node.Mode.EXCLUSIVE
                     def sshPort = 22
 
                     // Check if the node already exists to avoid duplication
