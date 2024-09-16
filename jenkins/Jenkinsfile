@@ -13,7 +13,7 @@ pipeline {
         AWS_CREDENTIALS = credentials('aws_creds')
         JENKINS_TOKEN = credentials('jenkins_api_token')
         USER_NAME = 'sam'
-        PASS = 'VicK#@344'
+        PASS = '11baf1c4a64484e07f40cbd5b37f8fba9e'
 
         IMAGE_NAME = 'playwright_python'
     }
