@@ -74,23 +74,20 @@ pipeline {
                     writeFile file: 'jenkins-slave-config.yaml', text: jenkinsSlaveConfig
 
                     // Use Jenkins credentials to securely retrieve the API token
-                    withCredentials([string(credentialsId: 'jenkins_api_token', variable: 'JENKINS_TOKEN')]) {
+                    withCredentials([string(credentialsId: 'jenkins_api_token', variable: ${JENKINS_TOKEN})]) {
                         
                         // Get CSRF crumb
-                        def crumbData = sh(script: """
-                            curl -u 'your-username:${JENKINS_TOKEN}' -s 'http://localhost:8080/crumbIssuer/api/json'
-                        """, returnStdout: true).trim()
+                        sh '''
+                            crumb=$(curl -u vickey:$JENKINS_TOKEN -s http://localhost:8080/crumbIssuer/api/json)
+                            crumbField=$(echo $crumb | jq -r .crumbRequestField)
+                            crumbToken=$(echo $crumb | jq -r .crumb)
 
-                        def crumbJson = readJSON text: crumbData
-                        def crumbField = crumbJson.crumbRequestField
-                        def crumb = crumbJson.crumb
-
-                        // Apply JCasC configuration with crumb and secure token
-                        sh """
-                            curl -X POST -u 'your-username:${JENKINS_TOKEN}' -H "${crumbField}: ${crumb}" \
-                            -F "jenkins-configuration=@jenkins-slave-config.yaml" \
-                            http://localhost:8080/configuration-as-code/apply
-                        """
+                            # Apply JCasC configuration with crumb and secure token
+                            curl -X POST -u vickey:$JENKINS_TOKEN \
+                                 -H "$crumbField: $crumbToken" \
+                                 -F "jenkins-configuration=@jenkins-slave-config.yaml" \
+                                 http://localhost:8080/configuration-as-code/apply
+                        '''
                     }
                 }
             }
