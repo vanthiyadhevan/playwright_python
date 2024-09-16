@@ -1,0 +1,7 @@
+/jenkins
+.gitignore
+Dockerfile
+Jenkinsfile
+docker-compose.yaml
+first_instance.tf
+slave_node_configuration.yaml
