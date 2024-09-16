@@ -7,7 +7,7 @@ jenkins:
         numExecutors: 1
         launcher:
           sshLauncher:
-            host: ""
+            host: "${EC2_IP}"
             port: 22
             credentialsId: "aws_creds"
             jvmOptions: "-Xmx1024m"
