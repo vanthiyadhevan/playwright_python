@@ -34,6 +34,15 @@ pipeline {
                 }
             }
         }
+        stage('Get EC2 Instance IP') {
+            steps {
+                script {
+                    // Get the EC2 instance public IP
+                    EC2_IP = sh(script: "terraform output -raw PublicIP", returnStdout: true).trim()
+                    echo "EC2 Instance IP: ${EC2_IP}"
+                }
+            }
+        }
         stage('Configure Jenkins Slave via JCasC') {
             steps {
                 script {
