@@ -64,7 +64,7 @@ pipeline {
                               sshLauncher:
                                 host: "${EC2_IP}"
                                 port: 22
-                                credentialsId: "slave_node"
+                                credentialsId: "aws_creds"
                                 jvmOptions: "-Xmx1024m"
                                 javaPath: "/usr/bin/java"
                                 launchTimeoutSeconds: 60
