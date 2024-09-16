@@ -7,7 +7,7 @@ def COLOR_MAP = [
 pipeline {
     agent any
     environment {
-        AWS_CREDENTIALS = credentials('awscreds')
+        AWS_CREDENTIALS = credentials('aws_creds')
 
         IMAGE_NAME = 'playwright_python'
     }
@@ -29,7 +29,7 @@ pipeline {
         }
         stage('Terraform Apply') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'awscreds']]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws_creds']]) {
                     sh 'terraform apply -auto-approve'
                 }
             }
