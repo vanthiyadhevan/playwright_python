@@ -13,6 +13,7 @@ pipeline {
         AWS_CREDENTIALS = credentials('aws_creds')
         JENKINS_TOKEN = credentials('jenkins_api_token')
         USER_NAME = 'sam'
+        PASS = 'VicK#@344'
 
         IMAGE_NAME = 'playwright_python'
     }
@@ -80,12 +81,12 @@ pipeline {
                         
                         // Get CSRF crumb
                         sh '''
-                            crumb=$(curl -u ${USER_NAME}:${JENKINS_TOKEN} -s http://localhost:8080/crumbIssuer/api/json)
+                            crumb=$(curl -u ${USER_NAME}:${PASS} -s http://localhost:8080/crumbIssuer/api/json)
                             crumbField=$(echo $crumb | jq -r .crumbRequestField)
                             crumbToken=$(echo $crumb | jq -r .crumb)
 
                             # Apply JCasC configuration with crumb and secure token
-                            curl -X POST -u "${USER_NAME}":"${JENKINS_TOKEN}" \
+                            curl -X POST -u "${USER_NAME}":"${PASS}" \
                                  -H "${crumbField}: ${crumbToken}" \
                                  -F "jenkins-configuration=@jenkins-slave-config.yaml" \
                                  http://localhost:8080/configuration-as-code/apply
