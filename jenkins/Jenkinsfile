@@ -7,6 +7,9 @@ def COLOR_MAP = [
 pipeline {
     agent any
     environment {
+        SSH_USER = 'ubuntu'
+        SSH_KEY = '/home/mr-skyline/Downloads/'
+        NODE_LABEL = 'jenkins-slave'
         AWS_CREDENTIALS = credentials('aws_creds')
 
         IMAGE_NAME = 'playwright_python'
@@ -76,6 +79,7 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
+            agent { label NODE_LABEL }
             steps {
                 // Build the Docker image from the cloned code
                 script {
@@ -84,7 +88,7 @@ pipeline {
             }
         }
         stage('Run Docker on Slave') {
-            agent { label 'EC2-Slave' }
+            agent { label NODE_LABEL }
             steps {
                 // Run Docker container on the slave instance
                 sh "docker run ${IMAGE_NAME}:${BUILD_NUMBER} pytest -v"
