@@ -12,7 +12,7 @@ pipeline {
         NODE_LABEL = 'jenkins-slave'
         AWS_CREDENTIALS = credentials('aws_creds')
         JENKINS_TOKEN = credentials('jenkins_api_token')
-        USER_NAME = 'sam'
+        USER_NAME = 'vickey'
         PASS = '11baf1c4a64484e07f40cbd5b37f8fba9e'
 
         IMAGE_NAME = 'playwright_python'
@@ -86,8 +86,8 @@ pipeline {
                             crumbToken=$(echo $crumb | jq -r .crumb)
 
                             # Apply JCasC configuration with crumb and secure token
-                            curl -X POST -u "${USER_NAME}":"${PASS}" \
-                                 -H "${crumbField}: ${crumbToken}" \
+                            curl -X POST -u ${USER_NAME}:${PASS} \
+                                 -H ${crumbField}: ${crumbToken} \
                                  -F "jenkins-configuration=@jenkins-slave-config.yaml" \
                                  http://localhost:8080/configuration-as-code/apply
                         '''
