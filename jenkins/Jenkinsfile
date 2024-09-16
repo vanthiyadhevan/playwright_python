@@ -8,7 +8,7 @@ pipeline {
     agent any
     environment {
         SSH_USER = 'ubuntu'
-        SSH_KEY = '/home/mr-skyline/Downloads/'
+        SSH_KEY = '/home/mr-skyline/Downloads/vickey-prod-key.pem'
         NODE_LABEL = 'jenkins-slave'
         AWS_CREDENTIALS = credentials('aws_creds')
 
@@ -61,7 +61,7 @@ pipeline {
                               sshLauncher:
                                 host: "${EC2_IP}"
                                 port: 22
-                                credentialsId: "aws_creds"
+                                credentialsId: "slave_node"
                                 jvmOptions: "-Xmx1024m"
                                 javaPath: "/usr/bin/java"
                                 launchTimeoutSeconds: 60
@@ -78,12 +78,12 @@ pipeline {
                         
                         // Get CSRF crumb
                         sh '''
-                            crumb=$(curl -u vickey:${JENKINS_TOKEN} -s http://localhost:8080/crumbIssuer/api/json)
+                            crumb=$(curl -u sam:${JENKINS_TOKEN} -s http://localhost:8080/crumbIssuer/api/json)
                             crumbField=$(echo $crumb | jq -r .crumbRequestField)
                             crumbToken=$(echo $crumb | jq -r .crumb)
 
                             # Apply JCasC configuration with crumb and secure token
-                            curl -X POST -u vickey:${JENKINS_TOKEN} \
+                            curl -X POST -u sam:${JENKINS_TOKEN} \
                                  -H "${crumbField}: ${crumbToken}" \
                                  -F "jenkins-configuration=@jenkins-slave-config.yaml" \
                                  http://localhost:8080/configuration-as-code/apply
