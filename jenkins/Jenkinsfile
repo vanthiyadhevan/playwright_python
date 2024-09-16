@@ -34,16 +34,35 @@ pipeline {
                 }
             }
         }
-        stage('Provision Jenkins Slave') {
+        stage('Configure Jenkins Slave via JCasC') {
             steps {
                 script {
-                    // Fetch the instance details from Terraform output
-                    def instanceIp = sh(script: 'terraform output -raw PublicIP', returnStdout: true).trim()
+                    def jenkinsSlaveConfig = """
+                    jenkins:
+                      nodes:
+                        - permanent:
+                            name: "jenkins-slave"
+                            description: "AWS EC2 instance configured as a Jenkins slave node"
+                            remoteFS: "/home/ubuntu/jenkins"
+                            numExecutors: 1
+                            launcher:
+                              sshLauncher:
+                                host: "${EC2_IP}"
+                                port: 22
+                                credentialsId: "aws_creds"
+                                jvmOptions: "-Xmx1024m"
+                                javaPath: "/usr/bin/java"
+                                launchTimeoutSeconds: 60
+                                maxNumRetries: 5
+                                retryWaitTime: 15
+                            labelString: "jenkins-slave"
+                            retentionStrategy:
+                              always: {}
+                    """
+                    writeFile file: 'jenkins-slave-config.yaml', text: jenkinsSlaveConfig
 
-                    // Register EC2 as a Jenkins slave
-                    // You'll need to use SSH credentials for connecting to the EC2 instance
-                    def slaveNode = jenkins.model.Jenkins.instance.createNode('EC2-Slave')
-                    slaveNode.setLauncher(new hudson.slaves.CommandLauncher("ssh -i ~/.ssh/id_rsa ubuntu@${instanceIp} java -jar /home/ubuntu/agent.jar"))
+                    // Apply the updated JCasC configuration
+                    sh 'curl -X POST -F "jenkins-configuration=@jenkins-slave-config.yaml" http://localhost:8080/configuration-as-code/apply'
                 }
             }
         }
