@@ -73,8 +73,25 @@ pipeline {
                     """
                     writeFile file: 'jenkins-slave-config.yaml', text: jenkinsSlaveConfig
 
-                    // Apply the updated JCasC configuration
-                    sh 'curl -X POST -F "jenkins-configuration=@jenkins-slave-config.yaml" http://localhost:8080/configuration-as-code/apply'
+                    // Use Jenkins credentials to securely retrieve the API token
+                    withCredentials([string(credentialsId: 'jenkins_api_token', variable: 'JENKINS_TOKEN')]) {
+                        
+                        // Get CSRF crumb
+                        def crumbData = sh(script: """
+                            curl -u 'your-username:${JENKINS_TOKEN}' -s 'http://localhost:8080/crumbIssuer/api/json'
+                        """, returnStdout: true).trim()
+
+                        def crumbJson = readJSON text: crumbData
+                        def crumbField = crumbJson.crumbRequestField
+                        def crumb = crumbJson.crumb
+
+                        // Apply JCasC configuration with crumb and secure token
+                        sh """
+                            curl -X POST -u 'your-username:${JENKINS_TOKEN}' -H "${crumbField}: ${crumb}" \
+                            -F "jenkins-configuration=@jenkins-slave-config.yaml" \
+                            http://localhost:8080/configuration-as-code/apply
+                        """
+                    }
                 }
             }
         }
