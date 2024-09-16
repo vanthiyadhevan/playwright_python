@@ -74,17 +74,17 @@ pipeline {
                     writeFile file: 'jenkins-slave-config.yaml', text: jenkinsSlaveConfig
 
                     // Use Jenkins credentials to securely retrieve the API token
-                    withCredentials([string(credentialsId: 'jenkins_api_token', variable: ${JENKINS_TOKEN})]) {
+                    withCredentials([string(credentialsId: 'jenkins_api_token', variable: '${JENKINS_TOKEN}')]) {
                         
                         // Get CSRF crumb
                         sh '''
-                            crumb=$(curl -u vickey:$JENKINS_TOKEN -s http://localhost:8080/crumbIssuer/api/json)
+                            crumb=$(curl -u vickey:${JENKINS_TOKEN} -s http://localhost:8080/crumbIssuer/api/json)
                             crumbField=$(echo $crumb | jq -r .crumbRequestField)
                             crumbToken=$(echo $crumb | jq -r .crumb)
 
                             # Apply JCasC configuration with crumb and secure token
-                            curl -X POST -u vickey:$JENKINS_TOKEN \
-                                 -H "$crumbField: $crumbToken" \
+                            curl -X POST -u vickey:${JENKINS_TOKEN} \
+                                 -H "${crumbField}: ${crumbToken}" \
                                  -F "jenkins-configuration=@jenkins-slave-config.yaml" \
                                  http://localhost:8080/configuration-as-code/apply
                         '''
