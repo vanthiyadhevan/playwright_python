@@ -65,7 +65,7 @@ pipeline {
                                 host: "${EC2_IP}"
                                 port: 22
                                 sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
-                                credentialsId: "aws_creds"
+                                credentialsId: "ubuntu"
                                 jvmOptions: "-Xmx1024m"
                                 javaPath: "/usr/bin/java"
                                 launchTimeoutSeconds: 60

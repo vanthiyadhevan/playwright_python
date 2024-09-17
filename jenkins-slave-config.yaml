@@ -9,7 +9,8 @@ jenkins:
           sshLauncher:
             host: "${EC2_IP}"
             port: 22
-            credentialsId: "aws_creds"
+            sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
+            credentialsId: "ubuntu"
             jvmOptions: "-Xmx1024m"
             javaPath: "/usr/bin/java"
             launchTimeoutSeconds: 60
