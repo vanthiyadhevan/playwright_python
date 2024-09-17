@@ -64,6 +64,7 @@ pipeline {
                               sshLauncher:
                                 host: "${EC2_IP}"
                                 port: 22
+                                sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
                                 credentialsId: "aws_creds"
                                 jvmOptions: "-Xmx1024m"
                                 javaPath: "/usr/bin/java"
@@ -87,7 +88,7 @@ pipeline {
 
                             # Apply JCasC configuration with crumb and secure token
                             curl -X POST -u ${USER_NAME}:${PASS} \
-                                 -H ${crumbField}: ${crumbToken} \
+                                 -H $crumbField: $crumbToken \
                                  -F "jenkins-configuration=@jenkins-slave-config.yaml" \
                                  http://localhost:8080/configuration-as-code/apply
                         '''
