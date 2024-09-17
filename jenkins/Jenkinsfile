@@ -65,7 +65,7 @@ pipeline {
                                 host: "${EC2_IP}"
                                 port: 22
                                 sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
-                                credentialsId: "ubuntu"
+                                credentialsId: "aws_creds"
                                 jvmOptions: "-Xmx1024m"
                                 javaPath: "/usr/bin/java"
                                 launchTimeoutSeconds: 60
@@ -78,17 +78,17 @@ pipeline {
                     writeFile file: 'jenkins-slave-config.yaml', text: jenkinsSlaveConfig
 
                     // Use Jenkins credentials to securely retrieve the API token
-                    withCredentials([string(credentialsId: 'jenkins_api_token', variable: "${JENKINS_TOKEN}")]) {
-                        
+                    withCredentials([string(credentialsId: 'jenkins_api_token', variable: 'JENKINS_TOKEN')]) {
+
                         // Get CSRF crumb
                         sh '''
-                            crumb=$(curl -u ${USER_NAME}:${PASS} -s http://192.168.1.8:8080/crumbIssuer/api/json)
+                            crumb=$(curl -u ${USER_NAME}:${PASS} -s http://localhost:8080/crumbIssuer/api/json)
                             crumbField=$(echo $crumb | jq -r .crumbRequestField)
                             crumbToken=$(echo $crumb | jq -r .crumb)
 
                             # Apply JCasC configuration with crumb and secure token
                             curl -X POST -u ${USER_NAME}:${PASS} \
-                                 -H $crumbField: $crumbToken \
+                                 -H "${crumbField}: ${crumbToken}" \
                                  -F "jenkins-configuration=@jenkins-slave-config.yaml" \
                                  http://localhost:8080/configuration-as-code/apply
                         '''
