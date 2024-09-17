@@ -10,7 +10,7 @@ jenkins:
             host: "${EC2_IP}"
             port: 22
             sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
-            credentialsId: "ubuntu"
+            credentialsId: "slave_node"
             jvmOptions: "-Xmx1024m"
             javaPath: "/usr/bin/java"
             launchTimeoutSeconds: 60
