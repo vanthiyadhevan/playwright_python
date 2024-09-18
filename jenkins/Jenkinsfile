@@ -14,7 +14,7 @@ pipeline {
         AWS_CREDENTIALS = credentials('aws_creds')
         JENKINS_TOKEN = credentials('jenkins_api_token')
         USER_NAME = 'vickey'
-        PASS = credentials('jenkins_pass')  // Jenkins password stored securely as a credential
+        PASS = credentials('jenkins_api_token')  // Jenkins password stored securely as a credential
         IMAGE_NAME = 'playwright_python'
     }
     stages {
