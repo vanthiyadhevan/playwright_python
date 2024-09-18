@@ -8,7 +8,7 @@ resource "aws_instance" "intro" {
   ami                    = "ami-085f9c64a9b75eed5"
   instance_type          = "t2.micro"
   key_name               = "nexgen"
-  vpc_security_group_ids = ["sg-0f46f08054096f939"]
+  vpc_security_group_ids = ["sg-0e4fc70f018d6de64"]
 
   # Specify the root volume for the instance
   root_block_device {
