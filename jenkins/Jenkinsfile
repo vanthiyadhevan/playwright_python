@@ -84,7 +84,7 @@ pipeline {
 
                             # Apply JCasC configuration with crumb and secure token
                             curl -v -X POST -u ${USER_NAME}:${PASS} \
-                                 -H "${crumbField}:${crumbToken}" \
+                                 -H "${crumbField}: ${crumbToken}" \
                                  -F "jenkins-configuration=@jenkins-slave-config.yaml" \
                                  http://192.168.1.10:8080/configuration-as-code/apply
                         '''
@@ -98,17 +98,17 @@ pipeline {
                 }
             }
         }
-        stage('Wait for Jenkins Slave') {
-            steps {
-                script {
-                    waitUntil {
-                        nodeExists = sh(script: "curl -s http://192.168.1.10:8080/computer/jenkins-slave/api/json | jq '.offline'", returnStdout: true).trim() == "false"
-                        return nodeExists
-                    }
-                    echo "Jenkins slave node is online!"
-                }
-            }
-        }
+        // stage('Wait for Jenkins Slave') {
+        //     steps {
+        //         script {
+        //             waitUntil {
+        //                 nodeExists = sh(script: "curl -s http://192.168.1.10:8080/computer/jenkins-slave/api/json | jq '.offline'", returnStdout: true).trim() == "false"
+        //                 return nodeExists
+        //             }
+        //             echo "Jenkins slave node is online!"
+        //         }
+        //     }
+        // }
         stage('Build Docker Image') {
             agent { label NODE_LABEL }
             steps {
