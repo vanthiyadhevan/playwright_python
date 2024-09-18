@@ -12,9 +12,9 @@ pipeline {
         SSH_KEY = '/home/mr-skyline/Downloads/vickey-prod-key.pem'
         NODE_LABEL = 'jenkins-slave'
         AWS_CREDENTIALS = credentials('aws_creds')
-        JENKINS_TOKEN = credentials('jenkins_api_token')
+        // JENKINS_TOKEN = credentials('jenkins_api_token')
         USER_NAME = 'vickey'
-        PASS = credentials('jenkins_api_token')  // Jenkins password stored securely as a credential
+        PASS = 'VicK#@344'  // Jenkins password stored securely as a credential
         IMAGE_NAME = 'playwright_python'
     }
     stages {
@@ -76,22 +76,25 @@ pipeline {
                     """
                     writeFile file: 'jenkins-slave-config.yaml', text: jenkinsSlaveConfig
 
-                    // Use Jenkins credentials to securely retrieve the API token
-                    withCredentials([string(credentialsId: 'jenkins_api_token', variable: 'JENKINS_TOKEN')]) {
-
-                        // Get CSRF crumb and apply JCasC configuration
-                        sh '''
+                    // Get CSRF crumb and apply JCasC configuration
+                    sh '''
                             crumb=$(curl -u ${USER_NAME}:${PASS} -s http://192.168.1.10:8080/crumbIssuer/api/json)
                             crumbField=$(echo $crumb | jq -r .crumbRequestField)
                             crumbToken=$(echo $crumb | jq -r .crumb)
 
                             # Apply JCasC configuration with crumb and secure token
-                            curl -X POST -u ${USER_NAME}:${PASS} \
+                            curl -v -X POST -u ${USER_NAME}:${PASS} \
                                  -H "${crumbField}:${crumbToken}" \
                                  -F "jenkins-configuration=@jenkins-slave-config.yaml" \
-                                 http://192.168.1.10:8080/manage/configuration-as-code/apply
+                                 http://192.168.1.10:8080/configuration-as-code/apply
                         '''
-                    }
+
+                    // Use Jenkins credentials to securely retrieve the API token
+                    // withCredentials([string(credentialsId: 'jenkins_api_token', variable: 'JENKINS_TOKEN')]) {
+
+                        
+                        
+                    // }
                 }
             }
         }
