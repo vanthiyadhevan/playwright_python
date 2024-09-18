@@ -47,6 +47,7 @@ pipeline {
                     EC2_IP = sh(script: "terraform output -raw PublicIP", returnStdout: true).trim()
                     echo "EC2 Instance IP: ${EC2_IP}"
                     sh 'export $EC2_IP'
+                    sh 'source ~/.bashrc'
                 }
             }
         }
@@ -66,7 +67,7 @@ pipeline {
                                 host: "${EC2_IP}"
                                 port: 22
                                 sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
-                                credentialsId: "aws_creds"
+                                credentialsId: "slave_node"
                                 jvmOptions: "-Xmx1024m"
                                 javaPath: "/usr/bin/java"
                                 launchTimeoutSeconds: 60
