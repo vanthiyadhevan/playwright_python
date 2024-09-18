@@ -2,8 +2,9 @@ def COLOR_MAP = [
     'SUCCESS' : 'good',
     'FAILURE' : 'danger',
     'UNSTABLE' : 'warning',
-    'ABOURTED' : 'warning'
+    'ABORTED' : 'warning'
 ]
+
 pipeline {
     agent any
     environment {
@@ -13,14 +14,13 @@ pipeline {
         AWS_CREDENTIALS = credentials('aws_creds')
         JENKINS_TOKEN = credentials('jenkins_api_token')
         USER_NAME = 'vickey'
-        PASS = '11baf1c4a64484e07f40cbd5b37f8fba9e'
-
+        PASS = credentials('jenkins_pass')  // Jenkins password stored securely as a credential
         IMAGE_NAME = 'playwright_python'
     }
     stages {
         stage('Clone repository') {
             steps {
-                git url: 'https://github.com/vanthiyadhevan/playwright_python.git', branch: 'jenkins_slave_node' 
+                git url: 'https://github.com/vanthiyadhevan/playwright_python.git', branch: 'jenkins_slave_node'
             }
         }
         stage('Terraform Init') {
@@ -44,9 +44,8 @@ pipeline {
             steps {
                 script {
                     // Get the EC2 instance public IP
-                    EC2_IP = sh(script: "terraform output -raw PublicIP", returnStdout: true).trim()
-                    echo "EC2 Instance IP: ${EC2_IP}"
-                    sh 'export $EC2_IP'
+                    env.EC2_IP = sh(script: "terraform output -raw PublicIP", returnStdout: true).trim()
+                    echo "EC2 Instance IP: ${env.EC2_IP}"
                 }
             }
         }
@@ -62,10 +61,9 @@ pipeline {
                             remoteFS: "/home/ubuntu/jenkins"
                             numExecutors: 1
                             launcher:
-                              sshLauncher:
+                              ssh:
                                 host: "${EC2_IP}"
                                 port: 22
-                                sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
                                 credentialsId: "slave_node"
                                 jvmOptions: "-Xmx1024m"
                                 javaPath: "/usr/bin/java"
@@ -81,19 +79,30 @@ pipeline {
                     // Use Jenkins credentials to securely retrieve the API token
                     withCredentials([string(credentialsId: 'jenkins_api_token', variable: 'JENKINS_TOKEN')]) {
 
-                        // Get CSRF crumb
+                        // Get CSRF crumb and apply JCasC configuration
                         sh '''
-                            crumb=$(curl -u ${USER_NAME}:${PASS} -s http://localhost:8080/crumbIssuer/api/json)
+                            crumb=$(curl -u ${USER_NAME}:${PASS} -s http://192.168.1.10:8080/crumbIssuer/api/json)
                             crumbField=$(echo $crumb | jq -r .crumbRequestField)
                             crumbToken=$(echo $crumb | jq -r .crumb)
 
                             # Apply JCasC configuration with crumb and secure token
                             curl -X POST -u ${USER_NAME}:${PASS} \
-                                 -H "${crumbField}: ${crumbToken}" \
-                                 -F "jenkins-configuration=${jenkinsSlaveConfig}" \
-                                 http://localhost:8080/manage/configuration-as-code/apply
+                                 -H "${crumbField}:${crumbToken}" \
+                                 -F "jenkins-configuration=@jenkins-slave-config.yaml" \
+                                 http://192.168.1.10:8080/manage/configuration-as-code/apply
                         '''
                     }
+                }
+            }
+        }
+        stage('Wait for Jenkins Slave') {
+            steps {
+                script {
+                    waitUntil {
+                        nodeExists = sh(script: "curl -s http://192.168.1.10:8080/computer/jenkins-slave/api/json | jq '.offline'", returnStdout: true).trim() == "false"
+                        return nodeExists
+                    }
+                    echo "Jenkins slave node is online!"
                 }
             }
         }
@@ -116,10 +125,10 @@ pipeline {
     }
     post {
         always {
-            echo "slack Notification..."
+            echo "Sending Slack Notification..."
             slackSend channel: "#jenkins-cicd",
             color: COLOR_MAP[currentBuild.currentResult],
-            message: "*${currentBuild.currentResult}:* job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
+            message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
         }
     }
 }
