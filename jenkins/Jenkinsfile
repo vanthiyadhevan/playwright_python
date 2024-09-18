@@ -47,7 +47,6 @@ pipeline {
                     EC2_IP = sh(script: "terraform output -raw PublicIP", returnStdout: true).trim()
                     echo "EC2 Instance IP: ${EC2_IP}"
                     sh 'export $EC2_IP'
-                    sh 'source ~/.bashrc'
                 }
             }
         }
