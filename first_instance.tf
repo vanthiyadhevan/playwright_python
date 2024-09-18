@@ -1,14 +1,14 @@
 provider "aws" {
-  region = "us-east-1"
+  region = "us-east-2"
   # access_key = "<your_access_key>"
   # secret_key = "<your_secret_key>"
 }
 
 resource "aws_instance" "intro" {
-  ami                    = "ami-0e86e20dae9224db8"
+  ami                    = "ami-085f9c64a9b75eed5"
   instance_type          = "t2.micro"
-  key_name               = "vickey-prod-key"
-  vpc_security_group_ids = ["sg-096add7865a855a64"]
+  key_name               = "nexgen"
+  vpc_security_group_ids = ["sg-0f46f08054096f939"]
 
   # Specify the root volume for the instance
   root_block_device {
