@@ -49,30 +49,28 @@ pipeline {
                 }
             }
         }
-        stages {
-            stage('Apply JCasC Configuration') {
-                steps {
-                    script {
-                        // Fetch Crumb Token for CSRF Protection
-                        def crumbData = sh(
-                            script: 'curl -u vickey:11baf1c4a64484e07f40cbd5b37f8fba9e -s http://192.168.1.10:8080/crumbIssuer/api/json', returnStdout: true).trim()
+        stage('Apply JCasC Configuration') {
+            steps {
+                script {
+                    // Fetch Crumb Token for CSRF Protection
+                    def crumbData = sh(
+                        script: 'curl -u vickey:11baf1c4a64484e07f40cbd5b37f8fba9e -s http://192.168.1.10:8080/crumbIssuer/api/json', returnStdout: true).trim()
 
-                        // Parse the crumb JSON response
-                        def crumbJson = readJSON text: crumbData
-                        def crumbField = crumbJson.crumbRequestField
-                        def crumbToken = crumbJson.crumb
+                    // Parse the crumb JSON response
+                    def crumbJson = readJSON text: crumbData
+                    def crumbField = crumbJson.crumbRequestField
+                    def crumbToken = crumbJson.crumb
 
-                        echo "Crumb field: ${crumbField}"
-                        echo "Crumb token: ${crumbToken}"
+                    echo "Crumb field: ${crumbField}"
+                    echo "Crumb token: ${crumbToken}"
 
-                        // Apply Jenkins Configuration using the Crumb for CSRF protection
-                        sh """
-                            curl -X POST http://192.168.1.10:8080/configuration-as-code/apply \
-                            --user vickey:11baf1c4a64484e07f40cbd5b37f8fba9e \
-                            -H "${crumbField}:${crumbToken}" \
-                            --form jenkins-configuration=@jenkins-slave-config.yaml
-                        """
-                    }
+                    // Apply Jenkins Configuration using the Crumb for CSRF protection
+                    sh """
+                        curl -X POST http://192.168.1.10:8080/configuration-as-code/apply \
+                        --user vickey:11baf1c4a64484e07f40cbd5b37f8fba9e \
+                        -H "${crumbField}:${crumbToken}" \
+                        --form jenkins-configuration=@jenkins-slave-config.yaml
+                    """
                 }
             }
         }
