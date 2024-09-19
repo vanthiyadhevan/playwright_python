@@ -49,58 +49,30 @@ pipeline {
                 }
             }
         }
-        stage('Configure Jenkins Slave via JCasC') {
-            steps {
-                script {
-                    def jenkinsSlaveConfig = """
-                    jenkins:
-                      nodes:
-                        - permanent:
-                            name: "jenkins-slave"
-                            description: "AWS EC2 instance configured as a Jenkins slave node"
-                            remoteFS: "/home/ubuntu/jenkins"
-                            numExecutors: 1
-                            launcher:
-                              ssh:
-                                host: "${EC2_IP}"
-                                port: 22
-                                credentialsId: "slave_node"
-                                jvmOptions: "-Xmx1024m"
-                                javaPath: "/usr/bin/java"
-                                launchTimeoutSeconds: 60
-                                maxNumRetries: 5
-                                retryWaitTime: 15
-                            labelString: "jenkins-slave"
-                            retentionStrategy:
-                              always: {}
-                    """
-                    writeFile file: 'jenkins-slave-config.yaml', text: jenkinsSlaveConfig
+        stages {
+            stage('Apply JCasC Configuration') {
+                steps {
+                    script {
+                        // Fetch Crumb Token for CSRF Protection
+                        def crumbData = sh(
+                            script: 'curl -u vickey:11baf1c4a64484e07f40cbd5b37f8fba9e -s http://192.168.1.10:8080/crumbIssuer/api/json', returnStdout: true).trim()
 
-                    // Get CSRF crumb and apply JCasC configuration
-                    sh '''
-                        # Get the CSRF crumb
-                        crumb=$(curl -u ${USER_NAME}:${PASS} -s http://192.168.1.10:8080/crumbIssuer/api/json)
-                        crumbField=$(echo $crumb | jq -r .crumbRequestField)
-                        crumbToken=$(echo $crumb | jq -r .crumb)
+                        // Parse the crumb JSON response
+                        def crumbJson = readJSON text: crumbData
+                        def crumbField = crumbJson.crumbRequestField
+                        def crumbToken = crumbJson.crumb
 
-                         # Print crumb info for debugging
                         echo "Crumb field: ${crumbField}"
                         echo "Crumb token: ${crumbToken}"
 
-                        # Apply JCasC configuration with the crumb and secure token
-                        curl -v -X POST http://192.168.1.10:8080/configuration-as-code/apply \
-                            --user ${USER_NAME}:${PASS} \
-                            --form "jenkins-configuration=@jenkins-slave-config.yaml" \
-                            -H "${crumbField}:${crumbToken}"                 
-                    '''
-
-
-                    // Use Jenkins credentials to securely retrieve the API token
-                    // withCredentials([string(credentialsId: 'jenkins_api_token', variable: 'JENKINS_TOKEN')]) {
-
-                        
-                        
-                    // }
+                        // Apply Jenkins Configuration using the Crumb for CSRF protection
+                        sh """
+                            curl -X POST http://192.168.1.10:8080/configuration-as-code/apply \
+                            --user vickey:11baf1c4a64484e07f40cbd5b37f8fba9e \
+                            -H "${crumbField}:${crumbToken}" \
+                            --form jenkins-configuration=@jenkins-slave-config.yaml
+                        """
+                    }
                 }
             }
         }
