@@ -52,6 +52,30 @@ pipeline {
         stage('Apply JCasC Configuration') {
             steps {
                 script {
+                    def jenkinsSlaveConfig = """
+                        jenkins:
+                          nodes:
+                            - permanent:
+                                name: "jenkins-slave"
+                                nodeDescription: "AWS EC2 instance configured as a Jenkins slave node"
+                                remoteFS: "/home/ubuntu/jenkins"
+                                numExecutors: 1
+                                launcher:
+                                  sshLauncher:
+                                    host: ""
+                                    port: 22
+                                    sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
+                                    credentialsId: "slave_node"
+                                    jvmOptions: "-Xmx1024m"
+                                    javaPath: "/usr/bin/java"
+                                    launchTimeoutSeconds: 60
+                                    maxNumRetries: 5
+                                    retryWaitTime: 15
+                                labelString: "jenkins-slave"
+                                retentionStrategy:
+                                  always: {}
+                    """
+                     writeFile file: 'jenkins-slave-config.yaml', text: jenkinsSlaveConfig
                     // Fetch Crumb Token for CSRF Protection
                     def crumbData = sh(
                         script: 'curl -u vickey:11baf1c4a64484e07f40cbd5b37f8fba9e -s http://192.168.1.10:8080/crumbIssuer/api/json', returnStdout: true).trim()
