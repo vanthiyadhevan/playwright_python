@@ -78,7 +78,7 @@ pipeline {
                      writeFile file: 'jenkins-slave-config.yaml', text: jenkinsSlaveConfig
                     // Fetch Crumb Token for CSRF Protection
                     def crumbData = sh(
-                        script: 'curl -v -X GET -u jenkins:11ade33c6072c85ec493c76145f587e345 -s http://18.225.255.234:8080/crumbIssuer/api/json', returnStdout: true).trim()
+                        script: 'curl -v -X GET -u jenkins:11ade33c6072c85ec493c76145f587e345 -s http://localhost:8080/crumbIssuer/api/json', returnStdout: true).trim()
 
                     // Parse the crumb JSON response
                     def crumbJson = readJSON text: crumbData
@@ -90,7 +90,7 @@ pipeline {
 
                     // Apply Jenkins Configuration using the Crumb for CSRF protection
                     sh """
-                        curl -v -X POST http://18.225.255.234:8080/configuration-as-code/apply \
+                        curl -v -X POST http://localhost:8080/configuration-as-code/apply \
                         --user jenkins:11ade33c6072c85ec493c76145f587e345 \
                         -H "${crumbField}:${crumbToken}" \
                         --form jenkins-configuration=@jenkins-slave-config.yaml
