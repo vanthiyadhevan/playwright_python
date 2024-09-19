@@ -90,7 +90,7 @@ pipeline {
                         # Apply JCasC configuration with the crumb and secure token
                         curl -v -X POST http://192.168.1.10:8080/configuration-as-code/apply \
                             --user ${USER_NAME}:${PASS} \
-                            --form "jenkins-configuration=@/var/lib/jenkins/workspace/playwright_01/jenkins-slave-config.yaml" \
+                            --form "jenkins-configuration=@jenkins-slave-config.yaml" \
                             -H "${crumbField}:${crumbToken}"                 
                     '''
 
