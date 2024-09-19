@@ -62,7 +62,7 @@ pipeline {
                                 numExecutors: 1
                                 launcher:
                                   sshLauncher:
-                                    host: ""
+                                    host: "${EC2_IP}"
                                     port: 22
                                     sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
                                     credentialsId: "slave_node"
