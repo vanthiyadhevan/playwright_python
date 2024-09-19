@@ -80,8 +80,8 @@ pipeline {
                     sh '''
                         # Get the CSRF crumb
                         crumb=$(curl -u ${USER_NAME}:${PASS} -s http://192.168.1.10:8080/crumbIssuer/api/json)
-                        crumbField = $(echo $crumb | jq -r .crumbRequestField)
-                        crumbToken = $(echo $crumb | jq -r .crumb)
+                        crumbField=$(echo $crumb | jq -r .crumbRequestField)
+                        crumbToken=$(echo $crumb | jq -r .crumb)
 
                         # Apply JCasC configuration with the crumb and secure token
                         curl -X POST http://192.168.1.10:8080/configuration-as-code/apply \
