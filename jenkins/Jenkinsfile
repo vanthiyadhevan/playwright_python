@@ -61,8 +61,8 @@ pipeline {
                                 remoteFS: "/home/ubuntu/jenkins"
                                 numExecutors: 1
                                 launcher:
-                                  sshLauncher:
-                                    host: "${EC2_IP}"
+                                  ssh:
+                                    host: "${env.EC2_IP}"
                                     port: 22
                                     sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
                                     credentialsId: "slave_node"
