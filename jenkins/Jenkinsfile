@@ -14,7 +14,7 @@ pipeline {
         AWS_CREDENTIALS = credentials('aws_creds')
         // JENKINS_TOKEN = credentials('jenkins_api_token')
         USER_NAME = 'vickey'
-        PASS = 'VicK#@344'  // Jenkins password stored securely as a credential
+        PASS = '11baf1c4a64484e07f40cbd5b37f8fba9e'  // Jenkins password stored securely as a credential
         IMAGE_NAME = 'playwright_python'
     }
     stages {
@@ -80,8 +80,8 @@ pipeline {
                     sh '''
                         # Get the CSRF crumb
                         crumb=$(curl -u ${USER_NAME}:${PASS} -s http://192.168.1.10:8080/crumbIssuer/api/json)
-                        crumbField=$(echo $crumb | jq -r .crumbRequestField)
-                        crumbToken=$(echo $crumb | jq -r .crumb)
+                        crumbField = $(echo $crumb | jq -r .crumbRequestField)
+                        crumbToken = $(echo $crumb | jq -r .crumb)
 
                         # Apply JCasC configuration with the crumb and secure token
                         curl -X POST http://192.168.1.10:8080/configuration-as-code/apply \
