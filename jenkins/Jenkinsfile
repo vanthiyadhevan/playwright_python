@@ -13,8 +13,8 @@ pipeline {
         NODE_LABEL = 'jenkins-slave'
         AWS_CREDENTIALS = credentials('aws_creds')
         // JENKINS_TOKEN = credentials('jenkins_api_token')
-        USER_NAME = 'jenkins'
-        PASS = '11ade33c6072c85ec493c76145f587e345'  // Jenkins password stored securely as a credential
+        USER_NAME = 'vickey'
+        PASS = '11baf1c4a64484e07f40cbd5b37f8fba9e'  // Jenkins password stored securely as a credential
         IMAGE_NAME = 'playwright_python'
     }
     stages {
@@ -78,7 +78,7 @@ pipeline {
                      writeFile file: 'jenkins-slave-config.yaml', text: jenkinsSlaveConfig
                     // Fetch Crumb Token for CSRF Protection
                     def crumbData = sh(
-                        script: 'curl -v -X GET -u jenkins:11ade33c6072c85ec493c76145f587e345 -s http://localhost:8080/crumbIssuer/api/json', returnStdout: true).trim()
+                        script: 'curl -v -X GET -u vickey:11baf1c4a64484e07f40cbd5b37f8fba9e -s http://localhost:8080/crumbIssuer/api/json', returnStdout: true).trim()
 
                     // Parse the crumb JSON response
                     def crumbJson = readJSON text: crumbData
@@ -91,7 +91,7 @@ pipeline {
                     // Apply Jenkins Configuration using the Crumb for CSRF protection
                     sh """
                         curl -v -X POST http://localhost:8080/configuration-as-code/apply \
-                        --user jenkins:11ade33c6072c85ec493c76145f587e345 \
+                        --user vickey:11baf1c4a64484e07f40cbd5b37f8fba9e \
                         -H "${crumbField}:${crumbToken}" \
                         --form jenkins-configuration=@jenkins-slave-config.yaml
                     """
