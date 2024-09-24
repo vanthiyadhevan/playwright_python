@@ -98,6 +98,13 @@ pipeline {
                 }
             }
         }
+        stage('Print JCasC File Location') {
+            steps {
+                script {
+                    echo "The Jenkins Configuration as Code (JCasC) file location is: ${pwd()}/jenkins-slave-config.yaml"
+                }
+            }
+        }
         // stage('Wait for Jenkins Slave') {
         //     steps {
         //         script {
